@@ -73,3 +73,4 @@ uritemplate==4.2.0
 urllib3==2.6.2
 watchdog==6.0.0
 wcwidth==0.2.14
+whitenoise==6.11.0
