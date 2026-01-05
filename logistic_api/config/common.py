@@ -21,6 +21,7 @@ class Common(Configuration):
         'rest_framework',            # utilities for rest apis
         'django_filters',            # for filtering rest endpoints
         'drf_spectacular',           # for generating API documentation
+        'corsheaders',               # for handling CORS
 
         # Your apps
         'logistic_api.users.apps.UsersConfig',
@@ -33,6 +34,7 @@ class Common(Configuration):
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
     MIDDLEWARE = (
         'django.middleware.security.SecurityMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
@@ -40,6 +42,21 @@ class Common(Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     )
+    
+    # CORS settings
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_HEADERS = [
+        'accept',
+        'accept-encoding',
+        'authorization',
+        'content-type',
+        'dnt',
+        'origin',
+        'user-agent',
+        'x-csrftoken',
+        'x-requested-with',
+    ]
 
     ALLOWED_HOSTS = ["*"]
     ROOT_URLCONF = 'logistic_api.urls'
