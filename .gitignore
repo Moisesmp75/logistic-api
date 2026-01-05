@@ -55,7 +55,6 @@ db.sqlite3
 db.sqlite3-journal
 *.pyc
 local_settings.py
-local.py
 .static_storage/
 .media/
 staticfiles/
