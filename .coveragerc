@@ -1,0 +1,10 @@
+[run]
+branch = True
+omit = *migrations*,
+       *urls*,
+       *test*,
+       *admin*,
+       ./manage.py,
+       ./logistic-api/config/*,
+       ./logistic-api/wsgi.py,
+       *__init__*
