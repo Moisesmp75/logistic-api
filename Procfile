@@ -1,1 +1,1 @@
-web: newrelic-admin run-program gunicorn logistic-api.wsgi:application
+web: gunicorn logistic-api.wsgi:application
