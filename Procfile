@@ -1,0 +1,1 @@
+web: gunicorn implementacion_oauth.wsgi
