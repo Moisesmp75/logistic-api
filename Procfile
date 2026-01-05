@@ -1,1 +1,1 @@
-web: gunicorn logistic-api.wsgi:application
+web: gunicorn logistic_api.wsgi:application

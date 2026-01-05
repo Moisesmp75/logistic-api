@@ -23,11 +23,11 @@ class Common(Configuration):
         'drf_spectacular',           # for generating API documentation
 
         # Your apps
-        'logistic-api.users.apps.UsersConfig',
-        'logistic-api.audit',
-        'logistic-api.operations',
-        'logistic-api.orders',
-        'logistic-api.profile'
+        'logistic_api.users.apps.UsersConfig',
+        'logistic_api.audit',
+        'logistic_api.operations',
+        'logistic_api.orders',
+        'logistic_api.profile'
     )
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
@@ -42,9 +42,9 @@ class Common(Configuration):
     )
 
     ALLOWED_HOSTS = ["*"]
-    ROOT_URLCONF = 'logistic-api.urls'
+    ROOT_URLCONF = 'logistic_api.urls'
     SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-    WSGI_APPLICATION = 'logistic-api.wsgi.application'
+    WSGI_APPLICATION = 'logistic_api.wsgi.application'
 
     # Email
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

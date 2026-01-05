@@ -8,8 +8,11 @@ services:
   web:
     restart: always
     environment:
-      - DJANGO_SECRET_KEY=local
-      - DATABASE_URL=postgres://postgres:@postgres:5432/postgres
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     build: ./
     command: >
       bash -c "python3 wait_for_postgres.py &&
