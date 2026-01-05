@@ -22,15 +22,101 @@ class OperationSerializer(serializers.ModelSerializer):
 class CreateOperationSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField(required=False, allow_blank=True)
+    order_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_empty=True
+    )
+    
+    def validate_order_ids(self, value):
+        """Validar que los orders no estén finalizados"""
+        if not value:
+            return value
+        
+        from ...orders.models import Order
+        orders = Order.objects.filter(id__in=value)
+        
+        # Verificar que todos los orders existan
+        found_ids = set(orders.values_list('id', flat=True))
+        requested_ids = set(value)
+        missing_ids = requested_ids - found_ids
+        if missing_ids:
+            raise serializers.ValidationError(
+                f"Orders not found: {list(missing_ids)}"
+            )
+        
+        # Verificar que ningún order esté finalizado
+        finalized_orders = []
+        for order in orders:
+            if order.is_finalized():
+                finalized_orders.append(str(order.id))
+        
+        if finalized_orders:
+            raise serializers.ValidationError(
+                f"Cannot assign finalized orders to an operation: {', '.join(finalized_orders)}"
+            )
+        
+        return value
 
     def create(self, validated_data):
         request = self.context['request']
+        order_ids = validated_data.pop('order_ids', [])
+        
         operation = Operation.objects.create(
             name=validated_data['name'],
             description=validated_data.get('description', ''),
             created_by=request.user
         )
+        
+        # Asignar pedidos al operativo si se proporcionaron
+        if order_ids:
+            from ...orders.models import Order
+            Order.objects.filter(id__in=order_ids).update(operation=operation)
+        
         return operation
+
+
+class UpdateOperationSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False)
+    description = serializers.CharField(required=False, allow_blank=True)
+    driver_id = serializers.UUIDField(required=False, allow_null=True)
+    order_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_empty=True
+    )
+    is_active = serializers.BooleanField(required=False)
+    is_finalized = serializers.BooleanField(required=False)
+    
+    def validate_order_ids(self, value):
+        """Validar que los orders no estén finalizados"""
+        if not value:
+            return value
+        
+        from ...orders.models import Order
+        orders = Order.objects.filter(id__in=value)
+        
+        # Verificar que todos los orders existan
+        found_ids = set(orders.values_list('id', flat=True))
+        requested_ids = set(value)
+        missing_ids = requested_ids - found_ids
+        if missing_ids:
+            raise serializers.ValidationError(
+                f"Orders not found: {list(missing_ids)}"
+            )
+        
+        # Verificar que ningún order esté finalizado
+        finalized_orders = []
+        for order in orders:
+            if order.is_finalized():
+                finalized_orders.append(str(order.id))
+        
+        if finalized_orders:
+            raise serializers.ValidationError(
+                f"Cannot assign finalized orders to an operation: {', '.join(finalized_orders)}"
+            )
+        
+        return value
 
 
 class CreateOperationStatusSerializer(serializers.Serializer):

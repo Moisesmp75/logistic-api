@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/v1/users/', include('logistic-api.users.urls')),
     path('api/v1/', include('logistic-api.profile.urls')),
     path('api/v1/', include('logistic-api.operations.urls')),
+    path('api/v1/', include('logistic-api.orders.urls')),
 
     # JWT
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

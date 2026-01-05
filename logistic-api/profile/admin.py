@@ -3,9 +3,8 @@ from .models import ClientProfile, InternalClientProfile, DriverProfile
 
 @admin.register(ClientProfile)
 class ClientProfileAdmin(admin.ModelAdmin):
-    list_display = ("business_name", "ruc", "is_active", "created_at")
-    search_fields = ("business_name", "ruc")
-    search_fields = ("business_name", "ruc")
+    list_display = ("business_name", "ruc", "phone_number", "contact_phone", "is_active", "created_at")
+    search_fields = ("business_name", "ruc", "phone_number", "contact_phone")
 
 
 @admin.register(DriverProfile)

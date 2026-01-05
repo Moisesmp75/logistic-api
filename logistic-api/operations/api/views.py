@@ -11,6 +11,7 @@ from ..models import Operation, OperationStatus
 from .serializers import (
     OperationSerializer,
     CreateOperationSerializer,
+    UpdateOperationSerializer,
     OperationStatusSerializer,
     CreateOperationStatusSerializer,
     ReorderOperationStatusesSerializer,
@@ -38,6 +39,8 @@ class OperationViewSet(
     def get_serializer_class(self):
         if self.action == "create":
             return CreateOperationSerializer
+        elif self.action in ["update", "partial_update"]:
+            return UpdateOperationSerializer
         return OperationSerializer
 
     def get_queryset(self):
@@ -69,6 +72,60 @@ class OperationViewSet(
         
         output_serializer = OperationSerializer(operation)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        operation = self.get_object()
+        user = request.user
+        
+        if user.role not in [User.Roles.ADMIN, User.Roles.INTERNAL]:
+            raise PermissionDenied("You do not have permission to update operations.")
+        
+        input_serializer = UpdateOperationSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        input_serializer.is_valid(raise_exception=True)
+        validated_data = input_serializer.validated_data
+        
+        # Actualizar campos básicos
+        if 'name' in validated_data:
+            operation.name = validated_data['name']
+        if 'description' in validated_data:
+            operation.description = validated_data.get('description', '')
+        if 'is_active' in validated_data:
+            operation.is_active = validated_data['is_active']
+        if 'is_finalized' in validated_data:
+            operation.is_finalized = validated_data['is_finalized']
+        
+        # Actualizar driver si se proporciona
+        if 'driver_id' in validated_data:
+            driver_id = validated_data['driver_id']
+            if driver_id:
+                from ...profile.models import DriverProfile
+                try:
+                    driver = DriverProfile.objects.get(id=driver_id)
+                    operation.driver = driver
+                except DriverProfile.DoesNotExist:
+                    return Response(
+                        {"detail": f"Driver {driver_id} not found."},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            else:
+                operation.driver = None
+        
+        # Actualizar orders si se proporcionan
+        if 'order_ids' in validated_data:
+            order_ids = validated_data['order_ids']
+            from ...orders.models import Order
+            if order_ids:
+                Order.objects.filter(id__in=order_ids).update(operation=operation)
+            # Si se envía una lista vacía, no se hace nada (mantiene los orders actuales)
+            # Si se quiere remover todos, se puede hacer en otro endpoint
+        
+        operation.save()
+        
+        output_serializer = OperationSerializer(operation)
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
