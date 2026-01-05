@@ -1,1 +1,1 @@
-web: gunicorn implementacion_oauth.wsgi
+web: newrelic-admin run-program gunicorn logistic-api.wsgi:application
